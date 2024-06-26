@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ... (existing head content) ... -->
+</head>
+<body>
+    <div class="container">
+        <h1>Comida Thor e Loki</h1>
+        <!-- ... (existing content) ... -->
+        
+        <h2>Generate Webhook for Family Member</h2>
+        <div class="input-group">
+            <input type="text" id="webhookNameInput" placeholder="Family member name">
+            <button onclick="generateWebhook()">Generate Webhook</button>
+        </div>
+        <div id="webhookResult"></div>
+        
+        <!-- ... (existing content) ... -->
+    </div>
+
+    <script>
+        // ... (existing JavaScript functions) ...
+
+        function generateWebhook() {
+            const name = document.getElementById('webhookNameInput').value;
+            if (!name) {
+                showError('Please enter a family member name');
+                return;
+            }
+            fetch('/api/webhook', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('webhookResult').innerHTML = `
+                    Webhook for ${name}: <strong>${window.location.origin}${data.webhook}</strong>`;
+                document.getElementById('webhookNameInput').value = '';
+                showError('');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Failed to generate webhook. Please try again.');
+            });
+        }
+
+        // ... (existing JavaScript code) ...
+    </script>
+</body>
+</html>

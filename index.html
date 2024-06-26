@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comida Thor e Loki</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .input-group {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #history {
+            margin-top: 20px;
+        }
+        .history-item {
+            background-color: #e9e9e9;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .history-item span {
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Comida Thor e Loki</h1>
+        <div class="input-group">
+            <input type="text" id="nameInput" placeholder="Quem colocou comida?">
+            <button onclick="recordFeeding()">Registrar</button>
+        </div>
+        <div id="error" class="error"></div>
+        <div id="history"></div>
+    </div>
+
+    <script>
+        function recordFeeding() {
+            const name = document.getElementById('nameInput').value;
+            if (!name) {
+                showError('Favor coloque seu nome');
+                return;
+            }
+            fetch('/api/feed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            })
+            .then(response => response.json())
+            .then(() => {
+                fetchHistory();
+                document.getElementById('nameInput').value = '';
+                showError('');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Favor tente novamente');
+            });
+        }
+
+        function fetchHistory() {
+            fetch('/api/history')
+            .then(response => response.json())
+            .then(data => {
+                const historyDiv = document.getElementById('history');
+                historyDiv.innerHTML = '<h2>Histórico de comida</h2>';
+                data.forEach(record => {
+                    const date = new Date(record.timestamp);
+                    historyDiv.innerHTML += `
+                        <div class="history-item">
+                            <span>${record.name}</span> Colocou comida em 
+                            ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}
+                        </div>`;
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Falha ao carregar histórico, favor carregue a página novamente');
+            });
+        }
+
+        function showError(message) {
+            document.getElementById('error').textContent = message;
+        }
+
+        // Fetch history on page load
+        fetchHistory();
+    </script>
+</body>
+</html>
